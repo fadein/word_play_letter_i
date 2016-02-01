@@ -87,9 +87,9 @@
 
 ;; how to apply deductions from the list of spare letters?
 ;; take the spare letters and a word
-;; return a copy of spare letters, sans the letters contained within the word
+;; return list of spare letters, sans the letters contained within the word
 ;; return #f if we try to deduct from a letter which is already empty
-(define (apply-deductions alis werd)
+(define (apply-deductions! alis werd)
   (let loop ((alis alis) (letters (string->list werd)))
 	(cond
 	  ;; end of the letters in werd
@@ -107,3 +107,21 @@
 			(begin
 			  (set-cdr! spare (sub1 (cdr spare)))
 			  (loop alis (cdr letters)))))))))
+
+(define (driver n winners)
+  (if (= n (vector-length i-words))
+	winners ; return the 1st winning list and quit
+	(let loop ((words-n (vector-ref i-words n)) (spares spares))
+	  (cond
+		((and (= n 2) (null? words-n))
+		 'the-end)
+
+		((null? words-n)
+		 #f) ;backtrack
+
+		(else
+		  (let ((deducted (apply-deductions! (deep-copy spares))))
+
+
+
+
