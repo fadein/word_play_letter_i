@@ -2,8 +2,27 @@
 
 (use irregex)
 
-(define *words-file* "words")
+(define *words-file* "shorty")
+;;;                      1    5 211 2   4   4      7 21  3 21
 (define *spare-letters* "bcccccddghkkllllmmmmnnnnnnnpprsssttw")
+
+;; make a structure mapping count of spare letters remaining
+(define spares
+  (let outer ((letters (string->list *spare-letters*)))
+
+	(if (null? letters) '()
+	  (let inner ((letters letters) (this (car letters)) (count 0))
+
+		  (cond 
+			((null? letters)
+			 (cons (cons this count) '()))
+			
+			((eq? this (car letters))
+			 (inner (cdr letters) this (add1 count)))
+
+			(else
+			  (cons (cons this count) (outer letters))))))))
+			 
 
 (define grid '( "i."
 				"i.."
@@ -44,6 +63,4 @@
 				(vector-set! vect word-len
 							 (append (vector-ref vect word-len) `(,word))))
 			  (loop (read-line)))))))
-	vect
-	))
-
+	vect))
