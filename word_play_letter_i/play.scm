@@ -2,7 +2,14 @@
 
 (use srfi-1 irregex)
 
-(define *words-file* "shorty")
+;; make a deep-copy of a list
+(define (deep-copy thing)
+   (if (not (pair? thing))
+       thing
+       (cons (deep-copy (car thing))
+             (deep-copy (cdr thing)))))
+
+(define *words-file* "words")
 ;;;                      1    5 211 2   4   4      7 21  3 21
 (define *spare-letters* "bcccccddghkkllllmmmmnnnnnnnpprsssttw")
 
@@ -69,11 +76,34 @@
 	vect))
 
 
-;; find all 2-letter words in the list that fit in the grid
-;; this should just return all of the 2-letter words in i-words
-(define (find-2-letter-words)
-  (let loop ((i-words (vector-ref i-words 2)))
+;; find all n-letter words in the list that fit in the grid
+;; this should just return all of the n-letter words in i-words
+(define (find-n-letter-words n)
+  (let loop ((i-words (vector-ref i-words n)))
 	(unless (null? i-words)
-	  (when (irregex-match (vector-ref regexen 2) (car i-words))
+	  (when (irregex-match (vector-ref regexen n) (car i-words))
 		(print (car i-words))
 		(loop (cdr i-words))))))
+
+;; how to apply deductions from the list of spare letters?
+;; take the spare letters and a word
+;; return a copy of spare letters, sans the letters contained within the word
+;; return #f if we try to deduct from a letter which is already empty
+(define (apply-deductions alis werd)
+  (let loop ((alis alis) (letters (string->list werd)))
+	(cond
+	  ;; end of the letters in werd
+	  ((null? letters)
+	   alis)
+
+	  ;; a letter in werd that's not deductible (e.g. #\i)
+	  ((not (assoc (car letters) alis))
+	   (loop alis (cdr letters)))
+
+	  (else
+		(let ((spare (assoc (car letters) alis)))
+		  (if (zero? (cdr spare))
+			#f
+			(begin
+			  (set-cdr! spare (sub1 (cdr spare)))
+			  (loop alis (cdr letters)))))))))
