@@ -1,6 +1,6 @@
 #!/usr/bin/csi -s
 
-(use irregex)
+(use srfi-1 irregex)
 
 (define *words-file* "shorty")
 ;;;                      1    5 211 2   4   4      7 21  3 21
@@ -34,9 +34,12 @@
 				"i...i..i."
 				".i..i..i.."))
 
+;; regular-expression versions of the strings in grid
 (define regexen
   (list->vector
-	(let ((cclass (conc "[" *spare-letters* "]")))
+	(let ((cclass (conc "[" 
+						(list->string (delete-duplicates (string->list *spare-letters*)))
+						"]")))
 	  (cons '()
 			(cons '()
 				  (map (lambda (p) (irregex-replace/all (irregex "\\.") p cclass))
@@ -64,3 +67,13 @@
 							 (append (vector-ref vect word-len) `(,word))))
 			  (loop (read-line)))))))
 	vect))
+
+
+;; find all 2-letter words in the list that fit in the grid
+;; this should just return all of the 2-letter words in i-words
+(define (find-2-letter-words)
+  (let loop ((i-words (vector-ref i-words 2)))
+	(unless (null? i-words)
+	  (when (irregex-match (vector-ref regexen 2) (car i-words))
+		(print (car i-words))
+		(loop (cdr i-words))))))
