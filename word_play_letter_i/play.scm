@@ -40,6 +40,9 @@
 				".i...i.."
 				"i...i..i."
 				".i..i..i.."))
+;(set! grid (drop-right grid 3))
+;(set! grid (drop-right grid 4))
+(set! grid (drop-right grid 5)) ; works w/o backtracking
 
 ;; regular-expression versions of the strings in grid
 (define regexen
@@ -85,6 +88,7 @@
 		(print (car i-words))
 		(loop (cdr i-words))))))
 
+
 ;; how to apply deductions from the list of spare letters?
 ;; take the spare letters and a word
 ;; return list of spare letters, sans the letters contained within the word
@@ -108,20 +112,27 @@
 			  (set-cdr! spare (sub1 (cdr spare)))
 			  (loop alis (cdr letters)))))))))
 
-(define (driver n winners)
-  (if (= n (vector-length i-words))
-	winners ; return the 1st winning list and quit
-	(let loop ((words-n (vector-ref i-words n)) (spares spares))
-	  (cond
-		((and (= n 2) (null? words-n))
-		 'the-end)
+(define (solver)
+  (define n 2)
+  (define (inner n spares)
+	(if (>= n (vector-length i-words))
+	  #t
+	  (begin
+		(print "DEBUG n is " n); DELETE ME
+		(let loop ((w (vector-ref i-words n)))
+		  (if (null? w)
+			#f
+			(let ((deductions (apply-deductions! (deep-copy spares) (car w))))
+			  (if deductions
+				(let ((it-worked (inner (add1 n) deductions)))
+				  (if it-worked
+					(cons (car w) it-worked)
+					(begin
+					  (print (car w) " didn't work, backtracking")
+					  #f)))
+				(begin
+				  (print (car w) " didn't deduct, backtracking")
 
-		((null? words-n)
-		 #f) ;backtrack
-
-		(else
-		  (let ((deducted (apply-deductions! (deep-copy spares))))
-
-
-
-
+				  (loop (cdr w))))))))))
+  (inner 2 spares))
+(print (solver))
