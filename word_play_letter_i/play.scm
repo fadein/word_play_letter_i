@@ -40,9 +40,12 @@
 				".i...i.."
 				"i...i..i."
 				".i..i..i.."))
+;(set! grid (drop-right grid 1))
+;(set! grid (drop-right grid 2))
 ;(set! grid (drop-right grid 3))
 ;(set! grid (drop-right grid 4))
-(set! grid (drop-right grid 5)) ; works w/o backtracking
+;(set! grid (drop-right grid 5)) ; works w/o backtracking
+
 
 ;; regular-expression versions of the strings in grid
 (define regexen
@@ -114,25 +117,27 @@
 
 (define (solver)
   (define (inner n spares)
-	(if (>= n (vector-length i-words))
+	(if (= n (vector-length i-words))
 	  #t
 	  (begin
-		(print "DEBUG n is " n); DELETE ME
+		;(print "DEBUG n is " n); DELETE ME
 		(let loop ((w (vector-ref i-words n)))
 		  (if (null? w)
 			#f
 			(let* ((the-word (car w))
 				   (deductions (apply-deductions! (deep-copy spares) the-word)))
-			  (print "trying word " the-word) ;DELETE ME
+			  ;(printf "trying ~a word ~a~n" n the-word) ;DELETE ME
 			  (if deductions
 				(let ((it-worked (inner (add1 n) deductions)))
 				  (if it-worked
 					(cons the-word it-worked)
 					(begin
-					  (print the-word " didn't work, backtracking")
-					  #f)))
+					  ;(print the-word " didn't work, backtracking") ; DELETE ME
+					  (loop (cdr w)))))
 				(begin
-				  (print the-word " didn't deduct, trying next word")
+				  ;(print " " the-word " didn't deduct, trying next word") ; DELETE ME
 				  (loop (cdr w))))))))))
   (inner 2 spares))
+
+
 (print (solver))
