@@ -113,7 +113,6 @@
 			  (loop alis (cdr letters)))))))))
 
 (define (solver)
-  (define n 2)
   (define (inner n spares)
 	(if (>= n (vector-length i-words))
 	  #t
@@ -122,17 +121,18 @@
 		(let loop ((w (vector-ref i-words n)))
 		  (if (null? w)
 			#f
-			(let ((deductions (apply-deductions! (deep-copy spares) (car w))))
+			(let* ((the-word (car w))
+				   (deductions (apply-deductions! (deep-copy spares) the-word)))
+			  (print "trying word " the-word) ;DELETE ME
 			  (if deductions
 				(let ((it-worked (inner (add1 n) deductions)))
 				  (if it-worked
-					(cons (car w) it-worked)
+					(cons the-word it-worked)
 					(begin
-					  (print (car w) " didn't work, backtracking")
+					  (print the-word " didn't work, backtracking")
 					  #f)))
 				(begin
-				  (print (car w) " didn't deduct, backtracking")
-
+				  (print the-word " didn't deduct, trying next word")
 				  (loop (cdr w))))))))))
   (inner 2 spares))
 (print (solver))
