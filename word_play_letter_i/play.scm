@@ -2,13 +2,6 @@
 
 (use srfi-1 irregex)
 
-;; make a deep-copy of a list
-(define (deep-copy thing)
-   (if (not (pair? thing))
-       thing
-       (cons (deep-copy (car thing))
-             (deep-copy (cdr thing)))))
-
 (define *words-file* "words")
 ;;;                      1    5 211 2   4   4      7 21  3 21
 (define *spare-letters* "bcccccddghkkllllmmmmnnnnnnnpprsssttw")
@@ -16,17 +9,13 @@
 ;; make a structure mapping count of spare letters remaining
 (define spares
   (let outer ((letters (string->list *spare-letters*)))
-
 	(if (null? letters) '()
 	  (let inner ((letters letters) (this (car letters)) (count 0))
-
 		  (cond 
 			((null? letters)
 			 (cons (cons this count) '()))
-			
 			((eq? this (car letters))
 			 (inner (cdr letters) this (add1 count)))
-
 			(else
 			  (cons (cons this count) (outer letters))))))))
 			 
@@ -40,12 +29,6 @@
 				".i...i.."
 				"i...i..i."
 				".i..i..i.."))
-;(set! grid (drop-right grid 1))
-;(set! grid (drop-right grid 2))
-;(set! grid (drop-right grid 3))
-;(set! grid (drop-right grid 4))
-;(set! grid (drop-right grid 5)) ; works w/o backtracking
-
 
 ;; regular-expression versions of the strings in grid
 (define regexen
@@ -92,10 +75,11 @@
 		(loop (cdr i-words))))))
 
 
-;; how to apply deductions from the list of spare letters?
-;; take the spare letters and a word
-;; return list of spare letters, sans the letters contained within the word
-;; return #f if we try to deduct from a letter which is already empty
+;; apply deductions from the alist of spare letters and their counts
+;; Input: spare letters alist and a word
+;; return alist of spare letters and their counts,
+;;    less the letters contained within the word
+;; return #f when we try to deduct from a letter which is already empty
 (define (apply-deductions! alis werd)
   (let loop ((alis alis) (letters (string->list werd)))
 	(cond
@@ -115,7 +99,17 @@
 			  (set-cdr! spare (sub1 (cdr spare)))
 			  (loop alis (cdr letters)))))))))
 
-(define (solver)
+;; utility function to make a deep-copy of a list
+;; In Scheme the cdr of a list is a location, which is basically like
+;; a pointer for purposes of copying a list - each list points to the
+;; same location, so modifying one list affects all copies
+(define (deep-copy thing)
+   (if (not (pair? thing))
+       thing
+       (cons (deep-copy (car thing))
+             (deep-copy (cdr thing)))))
+
+(define (main)
   (define (inner n spares)
 	(if (= n (vector-length i-words))
 	  #t
@@ -139,5 +133,4 @@
 				  (loop (cdr w))))))))))
   (inner 2 spares))
 
-
-(print (solver))
+(print (main))
